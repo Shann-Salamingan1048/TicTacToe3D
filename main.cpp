@@ -25,7 +25,7 @@ int main()
 #ifdef __linux__
     ensure_high_performance_gpu();
 #endif
-    Game::TicTacToe ttt("Tic Tac Toe 3D");
-    ttt.Start();
+    Core::Engine::Start<Game::TicTacToe>("Tic Tac Toe 3D");
+    //Core::Engine::Start<Game::TicTacToe>(800,800,"Tic Tac Toe 3D");
     return 0;
 }

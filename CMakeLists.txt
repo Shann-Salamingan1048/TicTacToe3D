@@ -22,6 +22,7 @@ set(SOURCE_FILES
         ebo.cpp
         Camera.cpp
         Shapes/Cube.cpp
+        Engine/Engine.cpp
 )
 
 # --- 4. CREATE EXECUTABLE ---
