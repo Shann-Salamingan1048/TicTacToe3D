@@ -1,16 +1,21 @@
 //
 // Created by shann on 3/1/26.
 //
-
+#include <algorithm>
+#include <ranges>
 #include "Cube.h"
+Cube::~Cube()
+{
+    std::println("Cube Destructor!");
+    m_vao.Delete();
+    m_vbo.Delete();
 
+}
 
-Cube::Cube(Shader* shader)
-    :m_shader(shader)
+Cube::Cube()
 {
     m_vao.Bind();
-    m_vao.LinkAttrib(m_vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
-    m_vao.LinkAttrib(m_vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    m_vao.LinkAttrib(m_vbo, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
     m_vao.Unbind();
     m_vbo.Unbind();
 

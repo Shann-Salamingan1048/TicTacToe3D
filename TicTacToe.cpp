@@ -15,7 +15,7 @@ TicTacToe::TicTacToe(int width, int height, const char* title)
 
 void TicTacToe::initObjects()
 {
-    cube = std::make_unique<Cube>(&cubeShader);
+    cube = std::make_unique<Cube>();
     auto size = getScreenSize();
     auto projection = glm::perspective(glm::radians(45.0f) ,
         static_cast<float>(size.x) / static_cast<float>(size.y),
@@ -23,8 +23,6 @@ void TicTacToe::initObjects()
     cubeShader.use();
     cubeShader.setMat4("projection",projection);
     cubeShader.setVec3("objectColor", glm::vec3{0,0,255});
-    Cube::CubePositions.emplace_back( 0.0f,  0.0f,  0.0f);
-    Cube::CubePositions.emplace_back( 3.0f,  0.0f,  0.0f);
 }
 
 void TicTacToe::update()
@@ -84,7 +82,7 @@ void TicTacToe::processInput(GLFWwindow *window)
             // 1. Get 2D Mouse Position
             double mouseX, mouseY;
             glfwGetCursorPos(window, &mouseX, &mouseY);
-
+            std::println("Mouse Pos: {}, {}", mouseX, mouseY);
             // 2. Convert to Normalized Device Coordinates (NDC) range [-1, 1]
             // Note: We invert the Y-axis because GLFW Y goes top-to-bottom, but OpenGL Y goes bottom-to-top
             float x = (2.0f * static_cast<float>(mouseX)) / static_cast<float>(size.x) - 1.0f;
@@ -111,7 +109,7 @@ void TicTacToe::processInput(GLFWwindow *window)
             // 6. Spawn the cube! Let's place it 5.0 units away along that ray
             glm::vec3 spawnPos = camera.Position + (ray_world * 5.0f);
 
-            Cube::CubePositions.push_back(spawnPos);
+            Cube::CubePositions.emplace_back(spawnPos);
             std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
 
             m_isLeftMousePressed = true;
