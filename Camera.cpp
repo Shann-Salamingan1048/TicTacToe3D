@@ -25,9 +25,9 @@ void Camera::updateCameraVectors()
 {
     // calculate the new Front vector
     glm::vec3 front;
-    front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    front.y = sin(glm::radians(Pitch));
-    front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    front.x = static_cast<float>(cos(glm::radians(Yaw)) * cos(glm::radians(Pitch)));
+    front.y = static_cast<float>(sin(glm::radians(Pitch)));
+    front.z = static_cast<float>(sin(glm::radians(Yaw)) * cos(glm::radians(Pitch)));
     Front = glm::normalize(front);
     // also re-calculate the Right and Up vector
     Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
@@ -64,7 +64,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 }
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
 {
-    float velocity = MovementSpeed * deltaTime;
+    const float velocity = MovementSpeed * deltaTime;
     if (direction == Camera_Movement::FORWARD)
         Position += Front * velocity;
     if (direction == Camera_Movement::BACKWARD)
@@ -74,7 +74,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
     if (direction == Camera_Movement::RIGHT)
         Position += Right * velocity;
 }
-glm::mat4 Camera::GetViewMatrix() const noexcept
+auto Camera::GetViewMatrix() const noexcept->glm::mat4
 {
     return glm::lookAt(Position, Position + Front, Up);
 }

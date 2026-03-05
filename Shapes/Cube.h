@@ -3,7 +3,7 @@
 #include "../vao.h"
 #include "../vbo.h"
 #include <vector>
-
+#include <array>
 class VAO;
 class VBO;
 
@@ -17,8 +17,9 @@ public:
     ~Cube();
 
     void Draw();
+    static void AddCube(glm::vec3 spawnCube);
 private:
-    static constexpr GLfloat m_vertices[108] =
+    static constexpr std::array<GLfloat, 108> m_vertices =
     {
         // Back face
         -0.5f, -0.5f, -0.5f,
@@ -70,9 +71,9 @@ private:
     };
 
 public:
-    static inline std::vector<glm::vec3> CubePositions;
+    static inline constinit std::vector<glm::vec3> CubePositions;
 
 private:
     VAO   m_vao{};
-    VBO   m_vbo{m_vertices, sizeof(m_vertices)};
+    VBO   m_vbo{m_vertices.data(), sizeof(m_vertices)};
 };

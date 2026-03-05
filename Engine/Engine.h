@@ -74,7 +74,7 @@ namespace Core
         {
             return *m_window;
         }
-        auto getScreenSize() const noexcept -> glm::i32vec2
+        auto getScreenSize() const noexcept -> const glm::i32vec2&
         {
             return m_Size;
         }
@@ -86,6 +86,20 @@ namespace Core
         {
             return m_Title;
         }
+    protected:
+        auto getMousePosition() const noexcept -> glm::vec2
+        {
+            double mouseX, mouseY;
+            glfwGetCursorPos(m_window, &mouseX, &mouseY);
+            return glm::vec2{mouseX, mouseY};
+        }
+        auto getNormalizedVersionOfMousePosition(const glm::vec2& mousePos, const glm::i32vec2& screenSize) const noexcept -> glm::vec2
+        {
+            const auto x = (2.0f * static_cast<float>(mousePos.x)) / static_cast<float>(screenSize.x) - 1.0f;
+            const auto y = 1.0f - (2.0f * static_cast<float>(mousePos.y)) / static_cast<float>(screenSize.y);
+            return glm::vec2{x,y};
+        }
+
     protected:
         virtual void processInput(GLFWwindow *window) = 0;
         virtual void update() = 0;

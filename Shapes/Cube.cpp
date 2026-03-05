@@ -1,9 +1,9 @@
 //
 // Created by shann on 3/1/26.
 //
-#include <algorithm>
-#include <ranges>
+
 #include "Cube.h"
+#include <print>
 Cube::~Cube()
 {
     std::println("Cube Destructor!");
@@ -19,6 +19,11 @@ Cube::Cube()
     m_vao.Unbind();
     m_vbo.Unbind();
 
+}
+
+void Cube::AddCube(glm::vec3 spawnCube)
+{
+    Cube::CubePositions.emplace_back(spawnCube);
 }
 
 void Cube::Draw()
