@@ -11,13 +11,14 @@ namespace Game
         explicit TicTacToe(int width, int height, const char* title);
         explicit TicTacToe(const char* title);
 
-    protected:
+    private:
         void processInput(GLFWwindow *window) override;
         void update() override;
         void render() override;
         void cleanUp() override;
         void initObjects() override;
-
+    private:
+        void resizeObjects();
 
     private:
         std::unique_ptr<Cube> cube;

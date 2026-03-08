@@ -3,6 +3,11 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
+
+static std::string readShaderFile(const char* filePath);
+static GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
+static GLuint compileShader(const char* source, GLenum type, const char* typeName);
+
 class Shader
 {
 public:
@@ -34,12 +39,8 @@ public:
 
 private:
 	mutable std::unordered_map<std::string, GLint> m_uniformCache;
-	GLint getUniformLocation(const std::string& name) const noexcept;
-private:
-	GLuint m_ID;
+	GLint getUniformLocation(const std::string& name) const;
 
 private:
-	static std::string readShaderFile(const char* filePath);
-	static GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
-	static GLuint compileShader(const char* source, GLenum type, const char* typeName);
+	GLuint m_ID;
 };

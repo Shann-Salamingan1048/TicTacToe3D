@@ -23,7 +23,8 @@ set(SOURCE_FILES
         Camera.cpp
         Shapes/Cube.cpp
         Engine/Engine.cpp
-        Shapes/BaseShape.cpp
+        Shapes/BaseShape3D.cpp
+        Utilities/globalFunctions.h
 )
 
 # --- 4. CREATE EXECUTABLE ---

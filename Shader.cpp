@@ -1,6 +1,7 @@
 ﻿#include "Shader.h"
 #include <fstream>
 #include <print>
+
 Shader::Shader(const char* vertPath, const char* fragPath) : m_ID{0}
 {
 	try
@@ -29,7 +30,7 @@ Shader::Shader(const char* vertPath, const char* fragPath) : m_ID{0}
 	}
 }
 
-GLuint Shader::compileShader(const char* source, GLenum type, const char* typeName)
+GLuint compileShader(const char* source, GLenum type, const char* typeName)
 {
 	GLuint shader = glCreateShader(type);
 	if (shader == 0) {
@@ -41,7 +42,7 @@ GLuint Shader::compileShader(const char* source, GLenum type, const char* typeNa
 
 	GLint success;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (!success) 
+	if (!success)
 	{
 		GLint logLength;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
@@ -56,7 +57,7 @@ GLuint Shader::compileShader(const char* source, GLenum type, const char* typeNa
 
 	return shader;
 }
-GLuint Shader::createShaderProgram(GLuint vertShader, GLuint fragShader)
+GLuint createShaderProgram(GLuint vertShader, GLuint fragShader)
 {
 	GLuint program = glCreateProgram();
 	if (program == 0) {
@@ -68,7 +69,7 @@ GLuint Shader::createShaderProgram(GLuint vertShader, GLuint fragShader)
 
 	GLint success;
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if (!success) 
+	if (!success)
 	{
 		GLint logLength;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
@@ -81,9 +82,9 @@ GLuint Shader::createShaderProgram(GLuint vertShader, GLuint fragShader)
 	}
 
 	return program;
-	
+
 }
-std::string Shader::readShaderFile(const char* filePath)
+std::string readShaderFile(const char* filePath)
 {
 	std::ifstream file;
 	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -109,7 +110,7 @@ std::string Shader::readShaderFile(const char* filePath)
 		{
 			throw std::runtime_error(std::format("File can not be read!"));
 		}
-
+		file.close();
 		return buffer;
 	}
 	catch (const std::ifstream::failure& e)
@@ -118,7 +119,7 @@ std::string Shader::readShaderFile(const char* filePath)
 			filePath, e.what()));
 	}
 }
-GLint Shader::getUniformLocation(const std::string& name) const noexcept// change to GLint if it errors
+GLint Shader::getUniformLocation(const std::string& name) const// change to GLint if it errors
 {
 	if (m_uniformCache.contains(name))
 		return m_uniformCache[name];
@@ -152,7 +153,7 @@ void Shader::setFloat(const std::string& name, float value) const
 // 1 means im uploading one vec2, vec3, vec4 uniform (not an array of vecs)
 /*
 	&value[0] gives you a pointer to the first float in the vec2.
-	OpenGL expects a pointer to raw float data (const GLfloat*), and 
+	OpenGL expects a pointer to raw float data (const GLfloat*), and
 	&value[0] gives it exactly that.
 
 	So &value[0] is a pointer to an array like: { value.x, value.y }
@@ -188,14 +189,14 @@ void Shader::setVec4(const std::string& name, float x, float y, float z, float w
 // Matrix
 // 1 means im uploading one mat2, mat3, mat4 uniform (not an array of mats)
 /*
-* 
+*
 * GL_FALSE = Don't transpose → Use the matrix as is (column-major layout).
 * GL_TRUE = Transpose it (interprets your data as row-major).
 	&mat[0][0] gives you a pointer to the first float in the vec2.
 	OpenGL expects a pointer to raw float data (const GLfloat*), and
 	&mat[0][0] gives it exactly that.
 
-	So &mat[0][0] is a  
+	So &mat[0][0] is a
 	Layout in memory (column-major):
 	mat[0][0]  mat[0][1]   // first column (x values)
 	mat[1][0]  mat[1][1]   // second column (y values)

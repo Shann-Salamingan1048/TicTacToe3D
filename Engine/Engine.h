@@ -6,11 +6,10 @@
 #include <string>
 #include <string_view>
 #include <glm/glm.hpp>
-#include "../TimeUtils.h"
 #include "../Camera.h"
 
 class Camera;
-struct Time;
+
 namespace Core
 {
     class Engine
@@ -34,7 +33,6 @@ namespace Core
 
     private:
         std::string m_Title;
-        Time m_Time;
         CameraUtils::Camera m_camera{glm::vec3(0.0f, 0.0f, 3.0f)};
         glm::i32vec2 m_Size{0,0};
         glm::i32vec2 m_FullScreenSize{0,0};
@@ -45,10 +43,7 @@ namespace Core
         {
             return m_camera;
         }
-        auto getTime() noexcept -> Time&
-        {
-            return m_Time;
-        }
+
     protected:
         void setTitleStr(std::string_view title) noexcept
         {
@@ -82,22 +77,9 @@ namespace Core
         {
             return m_FullScreenSize;
         }
-        auto getTitle() const noexcept -> const std::string&
+        auto getTitle() const noexcept -> std::string_view
         {
             return m_Title;
-        }
-    protected:
-        auto getMousePosition() const noexcept -> glm::vec2
-        {
-            double mouseX, mouseY;
-            glfwGetCursorPos(m_window, &mouseX, &mouseY);
-            return glm::vec2{mouseX, mouseY};
-        }
-        auto getNormalizedVersionOfMousePosition(const glm::vec2& mousePos, const glm::i32vec2& screenSize) const noexcept -> glm::vec2
-        {
-            const auto x = (2.0f * static_cast<float>(mousePos.x)) / static_cast<float>(screenSize.x) - 1.0f;
-            const auto y = 1.0f - (2.0f * static_cast<float>(mousePos.y)) / static_cast<float>(screenSize.y);
-            return glm::vec2{x,y};
         }
 
     protected:
@@ -106,11 +88,11 @@ namespace Core
         virtual void render() = 0;
         virtual void cleanUp() = 0;
         virtual void initObjects() = 0;
+
     private:
         GLFWwindow* m_window = nullptr;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
         static void printCurrentUseGPU() noexcept;
-
         static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
 
     };

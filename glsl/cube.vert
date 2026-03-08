@@ -1,15 +1,24 @@
 #version 460 core
-
-// The 3D position of each vertex coming from your C++ VBO
 layout (location = 0) in vec3 aPos;
 
-// The matrix math needed for 3D camera and perspective
+uniform vec3 aSize;      // Your 800, 1000, 1400
+uniform vec2 screenSize; // The width and height of your window
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-    // Multiply the vertex by the matrices to get its final screen position
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+
+    // Normalize the size based on the screen.
+    // X is divided by screen width.
+    // Y is divided by screen height.
+    // Z is divided by screen width to keep the depth scaling proportional.
+    vec3 normalizedSize = vec3(2.0f * aSize.x / screenSize.x - 1.0f, 1.0f - (2.0f * aSize.y / screenSize.y), aSize.z / screenSize.x);
+
+    // Scale the unit cube by the newly normalized fractional values
+    vec3 scaledPos = aPos * normalizedSize;
+
+    gl_Position = projection * view * model * vec4(scaledPos, 1.0);
 }

@@ -2,6 +2,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <print>
+#include "Utilities/TimeUtils.h"
+#include "Utilities/globalFunctions.h"
 using namespace Game;
 TicTacToe::TicTacToe(const char *title)
     :Engine(title)
@@ -16,7 +18,7 @@ TicTacToe::TicTacToe(int width, int height, const char* title)
 
 void TicTacToe::initObjects()
 {
-    cube = std::make_unique<Cube>();
+    cube = std::make_unique<Cube>(800,1000,1400);
     const auto& size = getScreenSize();
     const auto projection = glm::perspective(glm::radians(45.0f) ,
         static_cast<float>(size.x) / static_cast<float>(size.y),
@@ -28,29 +30,44 @@ void TicTacToe::initObjects()
 
 void TicTacToe::update()
 {
-    auto&[deltaTime, lastFrame, currentFrame] = getTime();
+    using namespace ShannUtilities;
     const auto& camera = getCamera();
     // Time
-    currentFrame = static_cast<float>(glfwGetTime());
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+    Time::currentFrame = static_cast<float>(glfwGetTime());
+    Time::deltaTime = Time::currentFrame - Time::lastFrame;
+    Time::lastFrame = Time::currentFrame;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
     const auto& view = camera.GetViewMatrix();
+    cubeShader.use();
     cubeShader.setMat4("view", view);
 }
 
 void TicTacToe::render()
 {
+    const auto& size = getScreenSize();
+    cubeShader.use();
+    resizeObjects();
     for (auto& CubePos : Cube::CubePositions)
     {
         auto model = glm::mat4(1.0f);
         model = glm::translate(model, CubePos);
+
         cubeShader.setMat4("model", model);
         cube->Draw();
     }
+}
+
+void TicTacToe::resizeObjects()
+{
+    const auto& size = getScreenSize();
+    cubeShader.use();
+    glm::vec3 scaledSize(cube->size.width, cube->size.height, cube->size.depth);
+    cubeShader.setVec3("aSize", scaledSize);
+    glm::vec2 shaderScreenSize(static_cast<float>(size.x), static_cast<float>(size.y));
+    cubeShader.setVec2("screenSize", shaderScreenSize);
 }
 
 void TicTacToe::cleanUp()
@@ -60,31 +77,32 @@ void TicTacToe::cleanUp()
 
 void TicTacToe::processInput(GLFWwindow *window)
 {
+    using namespace ShannUtilities;
     auto& camera = getCamera();
-    auto&[deltaTime, lastFrame, currentFrame] = getTime();
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, deltaTime);
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, Time::deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, deltaTime);
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, Time::deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, deltaTime);
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, Time::deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, deltaTime);
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, Time::deltaTime);
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
+        using namespace ShannUtilities;
         if (!m_isLeftMousePressed)
         {
             const auto& size = getScreenSize();
 
             // 1. Get 2D Mouse Position
-            const auto mousePos = getMousePosition();
+            const auto mousePos = getMousePosition(&getWindow());
 
             // 2. Convert to Normalized Device Coordinates (NDC) range [-1, 1]
             // Note: We invert the Y-axis because GLFW Y goes top-to-bottom, but OpenGL Y goes bottom-to-top
-            const auto normalizedMousePos = getNormalizedVersionOfMousePosition(mousePos, size);
+            const auto normalizedMousePos = getNormalizedVersion2D(mousePos, size);
             std::println("Mouse Pos: {}, {}", normalizedMousePos.x, normalizedMousePos.y);
             // 3. Convert to Clip Space
             const auto ray_clip = glm::vec4(normalizedMousePos.x, normalizedMousePos.y, -1.0f, 1.0f);
@@ -107,7 +125,7 @@ void TicTacToe::processInput(GLFWwindow *window)
             // 6. Spawn the cube! Let's place it 5.0 units away along that ray
             glm::vec3 spawnPos = camera.Position + (ray_world * 5.0f);
 
-            Cube::AddCube(spawnPos);
+            AddCube(spawnPos);
             std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
 
             m_isLeftMousePressed = true;
