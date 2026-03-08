@@ -8,7 +8,7 @@
 
 class VAO;
 class VBO;
-
+class BaseShape3D;
 constexpr const char* CubeVertPath = "glsl/cube.vert";
 constexpr const char* CubeFragPath = "glsl/cube.frag";
 

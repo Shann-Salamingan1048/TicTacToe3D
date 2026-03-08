@@ -18,7 +18,7 @@ namespace Game
         void cleanUp() override;
         void initObjects() override;
     private:
-        void resizeObjects();
+        void resizeObjects() const;
 
     private:
         std::unique_ptr<Cube> cube;

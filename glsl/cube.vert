@@ -15,7 +15,7 @@ void main()
     // X is divided by screen width.
     // Y is divided by screen height.
     // Z is divided by screen width to keep the depth scaling proportional.
-    vec3 normalizedSize = vec3(2.0f * aSize.x / screenSize.x - 1.0f, 1.0f - (2.0f * aSize.y / screenSize.y), aSize.z / screenSize.x);
+    vec3 normalizedSize = vec3(aSize.x / screenSize.x , aSize.y / screenSize.y, aSize.z / screenSize.x);
 
     // Scale the unit cube by the newly normalized fractional values
     vec3 scaledPos = aPos * normalizedSize;

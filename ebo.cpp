@@ -2,25 +2,29 @@
 
 EBO::EBO(GLuint* indices, GLsizeiptr size)
 {
-	glGenBuffers(1, &ID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+	// 1. Create AND initialize the buffer state immediately
+	glCreateBuffers(1, &ID);
+
+	// 2. Upload the data directly to the initialized ID
+	glNamedBufferData(ID, size, indices, GL_STATIC_DRAW);
 }
+
 EBO::EBO(const GLuint* indices, GLsizeiptr size)
 {
-	glGenBuffers(1, &ID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+	glCreateBuffers(1, &ID);
+	glNamedBufferData(ID, size, indices, GL_STATIC_DRAW);
 }
+
 void EBO::Bind()
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
-
 }
+
 void EBO::Unbind()
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
 void EBO::Delete()
 {
 	glDeleteBuffers(1, &ID);

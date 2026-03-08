@@ -47,7 +47,6 @@ void TicTacToe::update()
 
 void TicTacToe::render()
 {
-    const auto& size = getScreenSize();
     cubeShader.use();
     resizeObjects();
     for (auto& CubePos : Cube::CubePositions)
@@ -60,13 +59,13 @@ void TicTacToe::render()
     }
 }
 
-void TicTacToe::resizeObjects()
+void TicTacToe::resizeObjects() const
 {
     const auto& size = getScreenSize();
     cubeShader.use();
-    glm::vec3 scaledSize(cube->size.width, cube->size.height, cube->size.depth);
+    glm::vec3 scaledSize{cube->size.width, cube->size.height, cube->size.depth};
     cubeShader.setVec3("aSize", scaledSize);
-    glm::vec2 shaderScreenSize(static_cast<float>(size.x), static_cast<float>(size.y));
+    glm::vec2 shaderScreenSize{static_cast<float>(size.x), static_cast<float>(size.y)};
     cubeShader.setVec2("screenSize", shaderScreenSize);
 }
 

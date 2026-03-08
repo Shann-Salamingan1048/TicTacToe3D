@@ -38,7 +38,7 @@ void Engine::mouse_callBack(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 Engine::Engine(const char *title)
-    :m_Title{title}, m_isFullScreenInit(true)
+    :m_Title{title}, m_isFullScreenInit{true}
 {
     std::println("Engine Constructor Called!");
     std::println("Fullscreen!");
