@@ -98,7 +98,8 @@ void Engine::initWindow()
     glfwGetFramebufferSize(m_window, &m_Size.x, &m_Size.y);
     glfwSetCursorPosCallback(m_window, mouse_callBack);
     glfwSetWindowUserPointer(m_window, this);
-
+    glfwSetKeyCallback(m_window, keyCallBack);
+    glfwSetMouseButtonCallback(m_window, mouse_button_callback);
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::println("Failed to initialize GLAD");
@@ -111,6 +112,22 @@ void Engine::initWindow()
     printCurrentUseGPU();
 }
 
+void Engine::keyCallBack(GLFWwindow *window, int key, int scancode, int action, int mod) noexcept
+{
+    auto* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (!app) return;
+
+    // Let the specific Game (TicTacToe) handle its own keys
+    app->onKeyAction(key, action, mod, window);
+}
+void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    auto* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (!app) return;
+
+    // Bridge the raw GLFW event to your virtual game function
+    app->onMouseClick(button, action, mods);
+}
 void Engine::printCurrentUseGPU() noexcept
 {
     // --- 6. Print System Info (Verify GPU & Version) ---

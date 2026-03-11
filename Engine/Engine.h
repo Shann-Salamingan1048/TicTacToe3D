@@ -88,10 +88,13 @@ namespace Core
         virtual void render() = 0;
         virtual void cleanUp() = 0;
         virtual void initObjects() = 0;
-
+        virtual void onMouseClick(int button,int action, int mods) = 0;
+        virtual void onKeyAction(int button,int action, int mods, GLFWwindow* window) = 0;
     private:
         GLFWwindow* m_window = nullptr;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
+        static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+        static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mod) noexcept;
         static void printCurrentUseGPU() noexcept;
         static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
 

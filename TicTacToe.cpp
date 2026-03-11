@@ -18,7 +18,7 @@ TicTacToe::TicTacToe(int width, int height, const char* title)
 
 void TicTacToe::initObjects()
 {
-    cube = std::make_unique<Cube>(800,1000,1400);
+
     const auto& size = getScreenSize();
     const auto projection = glm::perspective(glm::radians(45.0f) ,
         static_cast<float>(size.x) / static_cast<float>(size.y),
@@ -55,7 +55,7 @@ void TicTacToe::render()
         model = glm::translate(model, CubePos);
 
         cubeShader.setMat4("model", model);
-        cube->Draw();
+        cube.Draw();
     }
 }
 
@@ -63,7 +63,7 @@ void TicTacToe::resizeObjects() const
 {
     const auto& size = getScreenSize();
     cubeShader.use();
-    glm::vec3 scaledSize{cube->size.width, cube->size.height, cube->size.depth};
+    glm::vec3 scaledSize{cube.size.width, cube.size.height, cube.size.depth};
     cubeShader.setVec3("aSize", scaledSize);
     glm::vec2 shaderScreenSize{static_cast<float>(size.x), static_cast<float>(size.y)};
     cubeShader.setVec2("screenSize", shaderScreenSize);
@@ -74,25 +74,19 @@ void TicTacToe::cleanUp()
     cubeShader.deleteShader();
 }
 
-void TicTacToe::processInput(GLFWwindow *window)
+void TicTacToe::onKeyAction(int key, int action, int mods, GLFWwindow* window)
 {
-    using namespace ShannUtilities;
-    auto& camera = getCamera();
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, Time::deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, Time::deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, Time::deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, Time::deltaTime);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
 
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+void TicTacToe::onMouseClick(int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
         using namespace ShannUtilities;
-        if (!m_isLeftMousePressed)
+        auto& camera = getCamera();
+        if (action == GLFW_PRESS && mouseState == MouseClickState::NONE)
         {
             const auto& size = getScreenSize();
 
@@ -127,11 +121,28 @@ void TicTacToe::processInput(GLFWwindow *window)
             AddCube(spawnPos);
             std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
 
-            m_isLeftMousePressed = true;
+            mouseState = MouseClickState::LEFT_CLICK;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            mouseState = MouseClickState::NONE;
         }
     }
-    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-    {
-        m_isLeftMousePressed = false;
-    }
+
+}
+
+void TicTacToe::processInput(GLFWwindow *window)
+{
+    using namespace ShannUtilities;
+    auto& camera = getCamera();
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, Time::deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, Time::deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, Time::deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, Time::deltaTime);
+
 }
