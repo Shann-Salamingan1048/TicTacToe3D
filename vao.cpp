@@ -1,6 +1,9 @@
-#include "vao.h"
+module;
+#include <glad/glad.h>
 #include <cstdint> // Required for uintptr_t casting
-
+module VAO;
+import VBO;
+import EBO;
 VAO::VAO()
 {
 	glCreateVertexArrays(1, &ID);

@@ -1,6 +1,9 @@
-﻿#include "Shader.h"
+﻿module;
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <fstream>
 #include <print>
+module Shader;
 
 Shader::Shader(const char* vertPath, const char* fragPath) : m_ID{0}
 {

@@ -1,7 +1,8 @@
-#pragma once
+module;
+#include <glad/glad.h> // Required for GLboolean
 #include <glm/glm.hpp>
-
-namespace CameraUtils
+export module Camera;
+export namespace CameraUtils
 {
     enum class Camera_Movement : uint8_t
     {
@@ -12,11 +13,11 @@ namespace CameraUtils
     };
 
     // Default camera values
-    static constexpr float YAW         = -90.0f;
-    static constexpr float PITCH       =  0.0f;
-    static constexpr float SPEED       =  2.5f;
-    static constexpr float SENSITIVITY =  0.1f;
-    static constexpr float ZOOM        =  45.0f;
+    inline constexpr float YAW         = -90.0f;
+    inline constexpr float PITCH       =  0.0f;
+    inline constexpr float SPEED       =  2.5f;
+    inline constexpr float SENSITIVITY =  0.1f;
+    inline constexpr float ZOOM        =  45.0f;
 
 
     // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL

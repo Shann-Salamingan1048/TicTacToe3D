@@ -1,7 +1,7 @@
-#pragma once
+module;
 #include <cstdint>
-
-class BaseShape3D
+export module BaseShape3D;
+export class BaseShape3D
 {
 public:
     explicit BaseShape3D(uint16_t width, uint16_t height, uint16_t depth);

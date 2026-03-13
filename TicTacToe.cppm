@@ -1,10 +1,13 @@
-#pragma once
-#include "Engine/Engine.h"
-#include "Shapes/Cube.h"
-#include <memory>
-class Cube;
+module;
 
-namespace Game
+#include <GLFW/glfw3.h>
+
+
+export module TicTacToe;
+import Engine;
+import Cube;
+import Shader;
+export namespace Game
 {
     enum class MouseClickState : uint8_t
     {

@@ -1,19 +1,17 @@
-#pragma once
-#include "../Shader.h"
-#include "../vao.h"
-#include "../vbo.h"
-#include "BaseShape3D.h"
+module;
 #include <vector>
 #include <array>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+export module Cube;
 
-class VAO;
-class VBO;
-class BaseShape3D;
-constexpr const char* CubeVertPath = "glsl/cube.vert";
-constexpr const char* CubeFragPath = "glsl/cube.frag";
+import BaseShape3D;
+import VAO;
+import VBO;
+export constexpr const char* CubeVertPath = "glsl/cube.vert";
+export constexpr const char* CubeFragPath = "glsl/cube.frag";
 
-
-class Cube : public BaseShape3D
+export class Cube : public BaseShape3D
 {
 public:
     explicit Cube();
@@ -82,7 +80,7 @@ private:
     VBO   m_vbo{m_vertices.data(), sizeof(m_vertices)};
 };
 
-inline void AddCube(glm::vec3 spawnCube)
+export inline void AddCube(glm::vec3 spawnCube)
 {
     Cube::CubePositions.emplace_back(spawnCube);
 }

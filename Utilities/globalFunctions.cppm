@@ -1,7 +1,8 @@
-#pragma once
+module;
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
-namespace ShannUtilities
+export module globalFunctions;
+export namespace ShannUtilities
 {
     inline auto getMousePosition(GLFWwindow* window) noexcept -> glm::vec2
     {

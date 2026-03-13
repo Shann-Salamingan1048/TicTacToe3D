@@ -2,10 +2,11 @@
 // Created by shann on 3/1/26.
 //
 
-#include "Cube.h"
+module;
 #include <print>
-
-#include "../Utilities/globalFunctions.h"
+#include <glad/glad.h>
+module Cube;
+import globalFunctions;
 Cube::~Cube()
 {
     std::println("Cube Destructor!");

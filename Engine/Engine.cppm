@@ -1,16 +1,19 @@
-#pragma once
+module;
 
-#include <glad/glad.h>
+// --- GLOBAL MODULE FRAGMENT ---
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <utility>
 #include <string>
 #include <string_view>
-#include <glm/glm.hpp>
-#include "../Camera.h"
 
-class Camera;
+// --- MODULE DECLARATION ---
+export module Engine;
 
-namespace Core
+// --- IMPORTS ---
+import Camera;
+
+export namespace Core
 {
     class Engine
     {
@@ -20,6 +23,7 @@ namespace Core
 
         virtual ~Engine() = default;
 
+        // Templates stay perfectly intact inside the export module!
         template<typename T, typename... Args>
         static void Start(Args&&... args)
         {
@@ -49,34 +53,43 @@ namespace Core
         {
             m_Title = title;
         }
+
         void setScreenHeight(int height) noexcept
         {
             m_Size.y = height;
         }
+
         void setScreenWidth(int width) noexcept
         {
             m_Size.x = width;
         }
-        void setScreenSize(glm::i32vec2 size)  noexcept
+
+        void setScreenSize(glm::i32vec2 size) noexcept
         {
             m_Size = size;
         }
+
     protected:
-        auto isWindowRunning() const noexcept->bool
-        { return glfwWindowShouldClose(m_window);};
+        auto isWindowRunning() const noexcept -> bool
+        {
+            return glfwWindowShouldClose(m_window);
+        }
 
         auto getWindow() const noexcept -> GLFWwindow&
         {
             return *m_window;
         }
+
         auto getScreenSize() const noexcept -> const glm::i32vec2&
         {
             return m_Size;
         }
+
         auto getFullScreenSize() const noexcept -> glm::i32vec2
         {
             return m_FullScreenSize;
         }
+
         auto getTitle() const noexcept -> std::string_view
         {
             return m_Title;
@@ -88,15 +101,16 @@ namespace Core
         virtual void render() = 0;
         virtual void cleanUp() = 0;
         virtual void initObjects() = 0;
-        virtual void onMouseClick(int button,int action, int mods) = 0;
-        virtual void onKeyAction(int button,int action, int mods, GLFWwindow* window) = 0;
+        virtual void onMouseClick(int button, int action, int mods) = 0;
+        virtual void onKeyAction(int button, int action, int mods, GLFWwindow* window) = 0;
+
     private:
         GLFWwindow* m_window = nullptr;
+
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
         static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
         static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mod) noexcept;
         static void printCurrentUseGPU() noexcept;
         static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
-
     };
 }

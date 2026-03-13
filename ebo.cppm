@@ -1,7 +1,8 @@
-#pragma once
+module;
 #include <glad/glad.h>
 
-class EBO
+export module EBO;
+export class EBO
 {
 public:
 	GLuint ID;

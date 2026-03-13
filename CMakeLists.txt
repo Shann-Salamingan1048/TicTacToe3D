@@ -1,37 +1,59 @@
-cmake_minimum_required(VERSION 3.26)
+# --- 1. REQUIRE CMAKE 3.28 FOR MODULES ---
+cmake_minimum_required(VERSION 3.28)
 project(TicTacToe3D C CXX)
 
-# --- 1. C++23 CONFIGURATION ---
+# --- 2. C++23 CONFIGURATION ---
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# --- 2. INCLUDE DIRECTORIES ---
-# This ensures both Linux and Windows can find your GLAD and header files
-include_directories(${CMAKE_SOURCE_DIR}/core/include)
+# Force GCC to enable module support
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fmodules-ts)
+endif()
 
 # --- 3. SOURCE FILES ---
 set(SOURCE_FILES
         main.cpp
         core/src/glad.c
-        TicTacToe.cpp
-        Shader.cpp
         Texture.cpp
         stb.cpp
-        vao.cpp
-        vbo.cpp
-        ebo.cpp
-        Camera.cpp
-        Shapes/Cube.cpp
-        Engine/Engine.cpp
-        Shapes/BaseShape3D.cpp
-        Utilities/globalFunctions.h
 )
 
 # --- 4. CREATE EXECUTABLE ---
 add_executable(TicTacToe3D ${SOURCE_FILES})
 
-# --- 5. ASSET COPYING (Shaders & Textures) ---
-# This handles copying your folders to the build directory so the app can find them
+# --- 5. ATTACH C++ MODULES ---
+target_sources(TicTacToe3D
+        PUBLIC
+        FILE_SET CXX_MODULES FILES
+        Camera.cppm
+        Engine/Engine.cppm
+        TicTacToe.cppm
+        Shapes/BaseShape3D.cppm
+        Shapes/Cube.cppm
+        Shader.cppm
+        vao.cppm
+        vbo.cppm
+        ebo.cppm
+        Utilities/globalFunctions.cppm
+        Utilities/TimeUtils.cppm
+        PRIVATE
+        Camera.cpp
+        Engine/Engine.cpp
+        TicTacToe.cpp
+        Shapes/BaseShape3D.cpp
+        Shapes/Cube.cpp
+        Shader.cpp
+        vao.cpp
+        vbo.cpp
+        ebo.cpp
+)
+
+# --- 6. TARGET INCLUDE DIRECTORIES ---
+# This specific line fixes the "Cannot find directory 'glad'" error in the IDE
+target_include_directories(TicTacToe3D PRIVATE ${CMAKE_SOURCE_DIR}/core/include)
+
+# --- 7. ASSET COPYING (Shaders & Textures) ---
 set(ASSET_FOLDERS "glsl")
 
 foreach(FOLDER ${ASSET_FOLDERS})
@@ -44,9 +66,8 @@ foreach(FOLDER ${ASSET_FOLDERS})
     )
 endforeach()
 
-# --- 6. PLATFORM-SPECIFIC LINKING ---
+# --- 8. PLATFORM-SPECIFIC LINKING ---
 if(WIN32)
-    # Windows-specific libraries and local GLFW .lib
     target_link_libraries(TicTacToe3D
             PRIVATE
             "${CMAKE_SOURCE_DIR}/core/lib/glfw3.lib"
@@ -56,8 +77,6 @@ if(WIN32)
             shell32
     )
 else()
-    # Zorin OS / Linux native libraries
-    # IMPORTANT: Run 'sudo apt install libglfw3-dev libgl1-mesa-dev' first!
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GLFW REQUIRED glfw3)
     find_package(OpenGL REQUIRED)
@@ -66,6 +85,6 @@ else()
             PRIVATE
             ${GLFW_LIBRARIES}
             OpenGL::GL
-            dl # Required for GLAD to load functions at runtime
+            dl
     )
 endif()

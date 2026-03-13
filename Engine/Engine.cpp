@@ -1,8 +1,9 @@
-//
-// Created by shann on 3/2/26.
-//
+
+module;
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <print>
-#include "Engine.h"
+module Engine;
 using namespace Core;
 
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept

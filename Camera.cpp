@@ -1,6 +1,8 @@
+module;
 #include <glad/glad.h>
-#include "Camera.h"
+
 #include <glm/gtc/matrix_transform.hpp>
+module Camera;
 using namespace CameraUtils;
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)

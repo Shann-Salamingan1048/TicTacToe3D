@@ -1,6 +1,7 @@
-#include "TicTacToe.h"
-#include <print>
 
+#include <print>
+import Engine;
+import TicTacToe;
 #ifdef _WIN32
 #include <windows.h>
     extern "C"

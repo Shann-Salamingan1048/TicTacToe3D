@@ -1,5 +1,7 @@
-#include "ebo.h"
+module;
+#include <glad/glad.h>
 
+module EBO;
 EBO::EBO(GLuint* indices, GLsizeiptr size)
 {
 	// 1. Create AND initialize the buffer state immediately

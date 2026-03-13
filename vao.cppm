@@ -1,10 +1,10 @@
-#pragma once
+module;
 #include <glad/glad.h>
-#include "vbo.h"
-#include "ebo.h"
 
-
-class VAO
+export module VAO;
+import VBO;
+import EBO;
+export class VAO
 {
 public:
 	GLuint ID;

@@ -1,8 +1,8 @@
-#pragma once
+module;
 
 #include <glad/glad.h>
-
-class VBO
+export module VBO;
+export class VBO
 {
 public:
 	GLuint ID;

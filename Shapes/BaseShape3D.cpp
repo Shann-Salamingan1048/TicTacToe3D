@@ -1,8 +1,9 @@
 //
 // Created by shann on 3/5/26.
 //
-
-#include "BaseShape3D.h"
+module;
+#include <cstdint>
+module BaseShape3D;
 
 
 BaseShape3D::BaseShape3D(uint16_t width, uint16_t height, uint16_t depth)
