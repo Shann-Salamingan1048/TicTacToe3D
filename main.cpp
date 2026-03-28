@@ -51,5 +51,6 @@ int main()
 #endif
 
         Core::Engine::Start<Game::TicTacToe>("Tic Tac Toe 3D");
+        //Core::Engine::Start<Game::TicTacToe>(1000,1000,"Tic Tac Toe 3D");
         return 0;
     }

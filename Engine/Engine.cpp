@@ -1,140 +1,196 @@
-
 module;
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <print>
+#include <stdexcept>
+
 module Engine;
-using namespace Core;
 
-void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept
+namespace Core
 {
-    glViewport(0, 0, width, height);
-}
-void Engine::mouse_callBack(GLFWwindow* window, double xposIn, double yposIn)
-{
-    // 1. Retrieve the "GetStart" instance from the window
-    auto* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-
-    // Safety check: ensure the pointer isn't null
-    if (!app) return;
-
-    // 2. Now use 'app->' to access your member variables
-    auto xpos = static_cast<float>(xposIn);
-    auto ypos = static_cast<float>(yposIn);
-
-    if (app->m_camera.firstMouse) // Access via app->
+    auto Engine::fromWindow(GLFWwindow* window) noexcept -> Engine*
     {
+        return static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    }
+
+    void Engine::framebufferSizeCallback(GLFWwindow* window, int width, int height) noexcept
+    {
+        glViewport(0, 0, width, height);
+
+        if (auto* app = fromWindow(window))
+        {
+            app->m_windowSize = {width, height};
+        }
+    }
+
+    void Engine::mouseMoveCallback(GLFWwindow* window, double xposIn, double yposIn) noexcept
+    {
+        auto* app = fromWindow(window);
+        if (app == nullptr)
+        {
+            return;
+        }
+
+        const auto xpos = static_cast<float>(xposIn);
+        const auto ypos = static_cast<float>(yposIn);
+
+        if (app->m_camera.firstMouse)
+        {
+            app->m_camera.lastX = xpos;
+            app->m_camera.lastY = ypos;
+            app->m_camera.firstMouse = false;
+        }
+
+        const float xoffset = xpos - app->m_camera.lastX;
+        const float yoffset = app->m_camera.lastY - ypos;
+
         app->m_camera.lastX = xpos;
         app->m_camera.lastY = ypos;
-        app->m_camera.firstMouse = false;
+        app->m_camera.ProcessMouseMovement(xoffset, yoffset);
     }
 
-    float xoffset = xpos - app->m_camera.lastX; // Access via app->
-    float yoffset = app->m_camera.lastY - ypos; // Access via app->
-
-    app->m_camera.lastX = xpos;
-    app->m_camera.lastY = ypos;
-
-    app->m_camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-Engine::Engine(const char *title)
-    :m_Title{title}, m_isFullScreenInit{true}
-{
-    std::println("Engine Constructor Called!");
-    std::println("Fullscreen!");
-    initWindow();
-}
-Engine::Engine(int width, int height,const char *title)
-    :m_Title{title}, m_isFullScreenInit{false}, m_Size{width,height}
-{
-    std::println("Engine Constructor Called!");
-    std::println("Not Fullscreen!");
-    initWindow();
-}
-void Engine::run()
-{
-    initObjects();
-    while (!isWindowRunning())
+    Engine::Engine(const char* title)
+        : m_title{title},
+          m_startFullscreen{true}
     {
-        update();
-
-        render();
-        processInput(m_window);
-        glfwSwapBuffers(m_window);
-        glfwPollEvents();
+        initWindow();
     }
-    cleanUp();
-    glfwTerminate();
-}
-void Engine::initWindow()
-{
-    if (!glfwInit())
+
+    Engine::Engine(int width, int height, const char* title)
+        : m_title{title},
+          m_windowSize{width, height},
+          m_startFullscreen{false}
     {
-        std::println("Failed to initialize GLFW");
-        return;
+        initWindow();
     }
-    // Updated to 4.6 to match your GLAD version
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor(); // or a specific monitor
-    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    m_FullScreenSize.y = mode->height;
-    m_FullScreenSize.x = mode->width;
-    glfwWindowHint(GLFW_SAMPLES, 4); // Anti Aliasing to make the Line Edge Smooth
-    if (m_isFullScreenInit)
-        m_window = glfwCreateWindow(m_FullScreenSize.x, m_FullScreenSize.y, m_Title.c_str(), nullptr, nullptr);
-    else
-        m_window = glfwCreateWindow(m_Size.x, m_Size.y, m_Title.c_str(), nullptr, nullptr);
-    if (m_window == nullptr)
+
+    auto Engine::isWindowRunning() const noexcept -> bool
     {
-        std::println("Failed to create GLFW window");
+        return m_window != nullptr && glfwWindowShouldClose(m_window) == GLFW_FALSE;
+    }
+
+    void Engine::requestClose() noexcept
+    {
+        if (m_window != nullptr)
+        {
+            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+        }
+    }
+
+    void Engine::run()
+    {
+        initObjects();
+
+        while (isWindowRunning())
+        {
+            glfwPollEvents();
+            processInput();
+            update();
+            render();
+            glfwSwapBuffers(m_window);
+        }
+
+        shutdown();
+    }
+
+    void Engine::initWindow()
+    {
+        if (glfwInit() == GLFW_FALSE)
+        {
+            throw std::runtime_error{"Failed to initialize GLFW."};
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        if (mode == nullptr)
+        {
+            glfwTerminate();
+            throw std::runtime_error{"Failed to query the primary monitor video mode."};
+        }
+
+        m_fullScreenSize = {mode->width, mode->height};
+
+        const int windowWidth = m_startFullscreen ? m_fullScreenSize.x : m_windowSize.x;
+        const int windowHeight = m_startFullscreen ? m_fullScreenSize.y : m_windowSize.y;
+
+        m_window = glfwCreateWindow(windowWidth, windowHeight, m_title.c_str(), nullptr, nullptr);
+        if (m_window == nullptr)
+        {
+            glfwTerminate();
+            throw std::runtime_error{"Failed to create the GLFW window."};
+        }
+
+        glfwMakeContextCurrent(m_window);
+        glfwSwapInterval(1);
+        glfwSetWindowUserPointer(m_window, this);
+        glfwSetFramebufferSizeCallback(m_window, &Engine::framebufferSizeCallback);
+        glfwSetCursorPosCallback(m_window, &Engine::mouseMoveCallback);
+        glfwSetKeyCallback(m_window, &Engine::keyCallback);
+        glfwSetMouseButtonCallback(m_window, &Engine::mouseButtonCallback);
+
+        glfwGetFramebufferSize(m_window, &m_windowSize.x, &m_windowSize.y);
+
+        if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)) == 0)
+        {
+            shutdown();
+            throw std::runtime_error{"Failed to initialize GLAD."};
+        }
+
+        m_camera.lastX = static_cast<float>(m_windowSize.x) * 0.5f;
+        m_camera.lastY = static_cast<float>(m_windowSize.y) * 0.5f;
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
+
+        printCurrentGpu();
+    }
+
+    void Engine::shutdown() noexcept
+    {
+        cleanUp();
+
+        if (m_window != nullptr)
+        {
+            glfwDestroyWindow(m_window);
+            m_window = nullptr;
+        }
+
         glfwTerminate();
-        return;
     }
-    glfwMakeContextCurrent(m_window);
-    glfwSwapInterval(1);
-    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-    glfwGetFramebufferSize(m_window, &m_Size.x, &m_Size.y);
-    glfwSetCursorPosCallback(m_window, mouse_callBack);
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetKeyCallback(m_window, keyCallBack);
-    glfwSetMouseButtonCallback(m_window, mouse_button_callback);
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+
+    void Engine::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) noexcept
     {
-        std::println("Failed to initialize GLAD");
-        return;
+        static_cast<void>(scancode);
+
+        auto* app = fromWindow(window);
+        if (app != nullptr)
+        {
+            app->onKeyAction(key, action, mods);
+        }
     }
-    m_camera.lastX = static_cast<float>(m_Size.x) / 2.0f;
-    m_camera.lastY = static_cast<float>(m_Size.y) / 2.0f;
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE); // Turn on Anti-Aliasing! // Anti Aliasing to make the Line Edge Smooth
-    printCurrentUseGPU();
-}
 
-void Engine::keyCallBack(GLFWwindow *window, int key, int scancode, int action, int mod) noexcept
-{
-    auto* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (!app) return;
+    void Engine::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) noexcept
+    {
+        auto* app = fromWindow(window);
+        if (app != nullptr)
+        {
+            app->onMouseClick(button, action, mods);
+        }
+    }
 
-    // Let the specific Game (TicTacToe) handle its own keys
-    app->onKeyAction(key, action, mod, window);
-}
-void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    auto* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (!app) return;
-
-    // Bridge the raw GLFW event to your virtual game function
-    app->onMouseClick(button, action, mods);
-}
-void Engine::printCurrentUseGPU() noexcept
-{
-    // --- 6. Print System Info (Verify GPU & Version) ---
-    std::println("---------------------------------------------");
-    std::println("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-    std::println("GPU Renderer:   {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER))); // Check if this says NVIDIA/AMD!
-    std::println("GLAD Version:   {}.{}", GLVersion.major, GLVersion.minor);
-    std::println("---------------------------------------------");
+    void Engine::printCurrentGpu() noexcept
+    {
+        std::println("---------------------------------------------");
+        std::println("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+        std::println("GPU Renderer:   {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+        std::println("GLAD Version:   {}.{}", GLVersion.major, GLVersion.minor);
+        std::println("---------------------------------------------");
+    }
 }

@@ -1,43 +1,43 @@
 module;
 
-#include <GLFW/glfw3.h>
-
+#include <cstdint>
 
 export module TicTacToe;
+
 import Engine;
 import Cube;
 import Shader;
+
 export namespace Game
 {
-    enum class MouseClickState : uint8_t
+    enum class MouseClickState : std::uint8_t
     {
-        LEFT_CLICK,
-        RIGHT_CLICK,
-        SCROLL,
-        NONE
+        None,
+        LeftClick,
+        RightClick,
+        Scroll,
     };
-    class TicTacToe : public Core::Engine
+
+    class TicTacToe final : public Core::Engine
     {
     public:
-        explicit TicTacToe(int width, int height, const char* title);
         explicit TicTacToe(const char* title);
+        TicTacToe(int width, int height, const char* title);
 
     private:
-        void processInput(GLFWwindow *window) override;
+        void processInput() override;
         void update() override;
         void render() override;
         void cleanUp() override;
         void initObjects() override;
-    private:
-        void onKeyAction(int button, int action, int mods,GLFWwindow* window) override;
+        void onKeyAction(int key, int action, int mods) override;
         void onMouseClick(int button, int action, int mods) override;
-    private:
+
         void resizeObjects() const;
 
     private:
-        Cube cube{800,1000,1400};
-        Shader cubeShader{CubeVertPath,CubeFragPath};
-        MouseClickState mouseState = MouseClickState::NONE;
-
+        Cube m_cube{800, 1000, 1400};
+        Shader m_cubeShader{CubeVertPath, CubeFragPath};
+        MouseClickState m_mouseState{MouseClickState::None};
     };
-};
+}

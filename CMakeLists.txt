@@ -1,30 +1,32 @@
-# --- 1. REQUIRE CMAKE 3.28 FOR MODULES ---
 cmake_minimum_required(VERSION 3.28)
-project(TicTacToe3D C CXX)
 
-# --- 2. C++23 CONFIGURATION ---
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(TicTacToe3D LANGUAGES C CXX)
 
-# Force GCC to enable module support
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-fmodules-ts)
-endif()
+add_executable(TicTacToe3D)
 
-# --- 3. SOURCE FILES ---
-set(SOURCE_FILES
+target_compile_features(TicTacToe3D PRIVATE cxx_std_23)
+
+set_target_properties(TicTacToe3D PROPERTIES
+        CXX_EXTENSIONS OFF
+)
+
+target_sources(TicTacToe3D
+        PRIVATE
         main.cpp
         core/src/glad.c
         Texture.cpp
         stb.cpp
-)
+        Camera.cpp
+        Engine/Engine.cpp
+        TicTacToe.cpp
+        Shapes/BaseShape3D.cpp
+        Shapes/Cube.cpp
+        Shader.cpp
+        vao.cpp
+        vbo.cpp
+        ebo.cpp
 
-# --- 4. CREATE EXECUTABLE ---
-add_executable(TicTacToe3D ${SOURCE_FILES})
-
-# --- 5. ATTACH C++ MODULES ---
-target_sources(TicTacToe3D
-        PUBLIC
+        PRIVATE
         FILE_SET CXX_MODULES FILES
         Camera.cppm
         Engine/Engine.cppm
@@ -37,26 +39,16 @@ target_sources(TicTacToe3D
         ebo.cppm
         Utilities/globalFunctions.cppm
         Utilities/TimeUtils.cppm
-        PRIVATE
-        Camera.cpp
-        Engine/Engine.cpp
-        TicTacToe.cpp
-        Shapes/BaseShape3D.cpp
-        Shapes/Cube.cpp
-        Shader.cpp
-        vao.cpp
-        vbo.cpp
-        ebo.cpp
 )
 
-# --- 6. TARGET INCLUDE DIRECTORIES ---
-# This specific line fixes the "Cannot find directory 'glad'" error in the IDE
-target_include_directories(TicTacToe3D PRIVATE ${CMAKE_SOURCE_DIR}/core/include)
+target_include_directories(TicTacToe3D
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/core/include
+)
 
-# --- 7. ASSET COPYING (Shaders & Textures) ---
-set(ASSET_FOLDERS "glsl")
+set(ASSET_FOLDERS glsl)
 
-foreach(FOLDER ${ASSET_FOLDERS})
+foreach(FOLDER IN LISTS ASSET_FOLDERS)
     add_custom_command(
             TARGET TicTacToe3D POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -66,7 +58,6 @@ foreach(FOLDER ${ASSET_FOLDERS})
     )
 endforeach()
 
-# --- 8. PLATFORM-SPECIFIC LINKING ---
 if(WIN32)
     target_link_libraries(TicTacToe3D
             PRIVATE
@@ -80,6 +71,8 @@ else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GLFW REQUIRED glfw3)
     find_package(OpenGL REQUIRED)
+
+    target_include_directories(TicTacToe3D PRIVATE ${GLFW_INCLUDE_DIRS})
 
     target_link_libraries(TicTacToe3D
             PRIVATE
